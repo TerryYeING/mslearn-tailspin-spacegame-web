@@ -47,21 +47,15 @@ steps:
     command: restore
     projects: '$(project)'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Build the project - $(buildConfiguration)'
-  inputs:
-    command: build
-    arguments: '--no-restore --configuration $(buildConfiguration)'
-    projects: '$(project)'
+- template: templates/build.yml 
+  parameters:
+    buildConfiguration: 'Debug'
+    project: '$(project)'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Publish the project - $(buildConfiguration)'
-  inputs:
-    command: publish    #publish build results (including its dependencies)
-    projects: '$(project)'
-    publishWebProjects: false
-    arguments:  '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
-    zipAfterPublish:  true
+- template: templates/build.yml 
+  parameters:
+    buildConfiguration: 'Release'
+    project: '$(project)'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Public Artifact: drop'
