@@ -1,8 +1,8 @@
-parameters:
+parameters:                       #This value will use default one if there is no parameters passed into this template
   buildConfiguration: 'Release'
   project: ''
 
-steps:
+steps:        
   - task: DotNetCoreCLI@2
     displayName: 'Build the project - ${{ parameters.buildConfiguration }}'
     inputs:
@@ -15,6 +15,6 @@ steps:
     inputs:
       command: publish    #publish build results (including its dependencies)
       projects: '${{ parameters.project }}'
-      publishWebProjects: false
+      publishWebProjects: false   #Build.ArtifactStagingDirectory is the folder storing artifact in azure devops
       arguments:  '--no-build --configuration ${{ parameters.buildConfiguration }} --output $(Build.ArtifactStagingDirectory)/${{ parameters.buildConfiguration }}'
-      zipAfterPublish:  true
+      zipAfterPublish:  true      #Zip the whole project folder into zip file
