@@ -4,14 +4,14 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- '*'
+- '*'     #Trigger branch, e.g. master, feature/xxxx, star means all branches will trigger azure devops build in each push, PR, master merge etc.
 
 pool:
-  vmImage: 'ubuntu-18.04'
+  vmImage: 'ubuntu-18.04'     #Specfy the agent image name, https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml
   demands:
     - npm
 
-variables:
+variables:              #Define the varible here
   solution: '**/*.sln'
   project: '**/*.csproj'
   buildPlatform: 'Any CPU'
@@ -44,15 +44,15 @@ steps:
 - task: DotNetCoreCLI@2
   displayName:  'Restore project dependencies'
   inputs:
-    command: restore
+    command: restore          #install dependent package which is listed in package.json
     projects: '$(project)'
 
-- template: templates/build.yml
+- template: templates/build.yml   #Build the project with debug
   parameters:
     buildConfiguration: 'Debug'
     project: '$(project)'
 
-- template: templates/build.yml
+- template: templates/build.yml   #Build the project with relrease
   parameters:
     buildConfiguration: 'Release'
     project: '$(project)'
