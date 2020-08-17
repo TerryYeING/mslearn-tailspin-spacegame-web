@@ -1,12 +1,20 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
 trigger:
-- '*'
+- '*'     #Trigger branch, e.g. master, feature/xxxx, star means all branches will trigger azure devops build in each push, PR, master merge etc.
 
 pool:
-  vmImage: 'ubuntu-18.04'
+  vmImage: 'ubuntu-18.04'     #Specfy the agent image name, https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops&tabs=yaml
   demands:
-  - npm
+    - npm
 
-variables:
+variables:              #Define the varible here
+  solution: '**/*.sln'
+  project: '**/*.csproj'
+  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   wwwrootDir: 'Tailspin.SpaceGame.Web/wwwroot'
   dotnetSdkVersion: '3.1.300'
@@ -38,12 +46,15 @@ steps:
     command: 'restore'
     projects: '**/*.csproj'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Build the project - $(buildConfiguration)'
-  inputs:
-    command: 'build'
-    arguments: '--no-restore --configuration $(buildConfiguration)'
-    projects: '**/*.csproj'
+- template: templates/build.yml   #Build the project with debug
+  parameters:
+    buildConfiguration: 'Debug'
+    project: '$(project)'
+
+- template: templates/build.yml   #Build the project with relrease
+  parameters:
+    buildConfiguration: 'Release'
+    project: '$(project)'
 
 - task: DotNetCoreCLI@2
   displayName: 'Run unit tests - $(buildConfiguration)'
@@ -52,7 +63,6 @@ steps:
     arguments: '--no-build --configuration $(buildConfiguration)'
     publishTestResults: true
     projects: '**/*.Tests.csproj'
-  
 
 - task: DotNetCoreCLI@2
   displayName: 'Publish the project - $(buildConfiguration)'
