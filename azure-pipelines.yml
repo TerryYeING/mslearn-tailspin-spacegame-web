@@ -21,13 +21,12 @@ variables:              #Define the varible here
 
 steps:
 - task: UseDotNet@2
-  displayName: 'Use .NET Core SDK 3.1.300'
+  displayName: 'Use .NET Core SDK $(dotnetSdkVersion)'
   inputs:
-    packageType: SDK
     version: '$(dotnetSdkVersion)'
 
 - task: Npm@1
-  displayName: 'Run NPM install'
+  displayName: 'Run npm install'
   inputs:
     verbose: false
 
@@ -37,15 +36,15 @@ steps:
 - task: gulp@1
   displayName: 'Run gulp tasks'
 
-- script:  echo "$(Build.DefinitionName), $(Build.BuildId), $(Build.BuildNumber)" > buildinfo.txt
+- script: 'echo "$(Build.DefinitionName), $(Build.BuildId), $(Build.BuildNumber)" > buildinfo.txt'
   displayName: 'Write build info'
-  workingDirectory:  '$(wwwrootDir)'
+  workingDirectory: $(wwwrootDir)
 
 - task: DotNetCoreCLI@2
-  displayName:  'Restore project dependencies from config'
+  displayName: 'Restore project dependencies'
   inputs:
-    command: restore          #install dependent package which is listed in package.json
-    projects: '$(project)'
+    command: 'restore'
+    projects: '**/*.csproj'
 
 - template: templates/build.yml   #Build the project with debug
   parameters:
@@ -57,6 +56,23 @@ steps:
     buildConfiguration: 'Release'
     project: '$(project)'
 
+- task: DotNetCoreCLI@2
+  displayName: 'Run unit tests - $(buildConfiguration)'
+  inputs:
+    command: 'test'
+    arguments: '--no-build --configuration $(buildConfiguration)'
+    publishTestResults: true
+    projects: '**/*.Tests.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish the project - $(buildConfiguration)'
+  inputs:
+    command: 'publish'
+    projects: '**/*.csproj'
+    publishWebProjects: false
+    arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+    zipAfterPublish: true
+
 - task: PublishBuildArtifacts@1
-  displayName: 'Public Artifact: drop'
+  displayName: 'Publish Artifact: drop'
   condition: succeeded()
