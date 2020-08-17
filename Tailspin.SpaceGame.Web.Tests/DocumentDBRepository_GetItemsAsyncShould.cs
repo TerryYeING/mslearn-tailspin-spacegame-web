@@ -50,5 +50,20 @@ namespace Tests
             // Verify that each score's game region matches the provided game region.
             Assert.That(scores, Is.All.Matches<Score>(score => score.GameRegion == gameRegion));
         }
+
+        [TestCase(1, 2)]
+        [TestCase(2, 3)]
+        [TestCase(3, 4)]
+        [TestCase(4, 5)]
+        [TestCase(5, 6)]
+        [TestCase(6, 7)]
+        [TestCase(7, 8)]
+        [TestCase(8, 9)]
+        [TestCase(9, 10)]
+        public void add_two_number(int a, int b) {
+
+            int total_sum = a + b;
+            Assert.AreEqual(total_sum, (a + b));
+        }
     }
 }
